@@ -3,14 +3,21 @@ module Main exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Html exposing (..)
-
+import Browser exposing (..)
 import Svg
 import Svg.Attributes as SvgAtt
+
+import Svg.Events as Events
+
+
 import String
 import Basics exposing (..)
 
 --model
+
+
+type Msg =
+    PosX Int
 
 type alias Square = 
     {positionX: Int
@@ -18,15 +25,23 @@ type alias Square =
     ,color: String
     }
 
+
+type alias Piece = 
+    {positionX: Int
+    ,positionY: Int
+    ,color: String
+    }
+
+
 --update
+
 
 --view
 
 generateSquare: (Int,List Int) -> List Square
 generateSquare (line_number, collum_array) =
     List.map (\x -> Square ((x)*70) ((line_number)*70)
-
-     (
+     ( 
          if modBy 2 line_number == 0 then
             if modBy 2 x == 0 then
                 "black"
@@ -70,13 +85,34 @@ showSquare square =
         ]
         []
 
-showCanvas: List Square -> Html msg
-showCanvas square_list = 
+
+showPiece: Piece -> Svg.Svg msg
+showPiece piece =
+    Svg.circle
+        [SvgAtt.cx (String.fromInt piece.positionX)
+        , SvgAtt.cy (String.fromInt piece.positionY)
+        , SvgAtt.r "35"
+        , SvgAtt.stroke "black"
+        , SvgAtt.fill piece.color
+        ]
+        []
+
+showCanvas: List Square -> List Piece -> Html msg
+showCanvas square_list piece_list = 
     Svg.svg
         [ SvgAtt.width "1000"
         , SvgAtt.height "1000"
         ]
-        (List.map (showSquare) square_list)
+        (List.append (List.map showSquare square_list) (List.map showPiece piece_list))
 
-main= 
-    showCanvas (generateBoard)
+
+
+main=
+    --Browser.element
+    let
+        posX = 100
+        posY = 100
+     in
+     div[]
+     [showCanvas (generateBoard) [Piece (posX) posY "brown"]]
+
