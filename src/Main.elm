@@ -30,7 +30,8 @@ type alias Model =
 
 
 type alias Square = 
-    {positionX: Int
+    {id:Int
+    ,positionX: Int
     ,positionY: Int
     ,color: String
     ,piece: Maybe Piece
@@ -47,12 +48,37 @@ type alias Piece =
 init : flags -> ( Model, Cmd Msg )
 init f =
     let
-        square_list = generateBoard
+        square_list = (putSquareIds generateBoard)
+        piece_list = putPiecesIds (List.map(\x -> Maybe.withDefault (Piece 404 2000 2000 "" False) (x.piece)) square_list)
     in
 
-    (Model square_list (List.map 
-    (\x -> Maybe.withDefault (Piece 2000 2000 2000 "" False) (x.piece)) square_list)
-    , Cmd.none )
+    (Model square_list piece_list, Cmd.none )
+
+putSquareIds: List Square -> List Square
+putSquareIds square_list=
+    List.map (\x->
+            Square 
+                (Tuple.first x) 
+                (Tuple.second x).positionX 
+                (Tuple.second x).positionY 
+                (Tuple.second x).color 
+                (Tuple.second x).piece
+            )        
+    (List.indexedMap Tuple.pair square_list)
+
+
+putPiecesIds: List Piece -> List Piece
+putPiecesIds piece_list=
+    List.map (\x->
+                Piece 
+                    (Tuple.first x) 
+                    (Tuple.second x).positionX 
+                    (Tuple.second x).positionY 
+                    (Tuple.second x).color
+                    (Tuple.second x).clicked
+            )
+    (List.indexedMap Tuple.pair piece_list)
+
 
 generateBoard: List Square
 generateBoard = 
@@ -71,21 +97,21 @@ generateBoard =
 
 generateSquare: (Int,List Int) -> List Square
 generateSquare (line_number, collum_array) =
-    List.map (\x -> Square ((x)*70) ((line_number)*70)
+    List.map (\x -> Square 0 ((x)*70) ((line_number)*70)
      ( 
          if modBy 2 line_number == 0 then
             if modBy 2 x == 0 then
-                "black"
-            else
                 "white"
+            else
+                "black"
         else
              if modBy 2 x == 0 then
-                "white"
-            else
                 "black"
+            else
+                "white"
      ) 
      (
-        if (modBy 2 line_number == 0 && modBy 2 x == 0)||(modBy 2 line_number /= 0 && modBy 2 x /= 0) then
+        if (modBy 2 line_number == 0 && modBy 2 x /= 0)||(modBy 2 line_number /= 0 && modBy 2 x == 0) then
             if line_number >= 5 then
                 Just (Piece 0 (toFloat ((x)*70)+35) (toFloat ((line_number)*70)+35) "white" False)
             else if line_number < 3 then
@@ -106,6 +132,7 @@ type Msg
     | MouseMsg
     | MouseMove ( Float, Float )
     | MouseDownAt ( Float, Float )
+    | MouseUp ( Float, Float )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -116,13 +143,25 @@ update msg model =
             (\x ->
                 if ((Tuple.first t) < (x.positionX+20) && (Tuple.first t) > (x.positionX-20) && 
                     (Tuple.second t) < (x.positionY+20) && (Tuple.second t) > (x.positionY-20)) then
-                    Piece x.id x.positionX x.positionY x.color (not x.clicked)
+                    Piece  x.id x.positionX x.positionY x.color (not x.clicked)
                 else
                     x
             )
             model.pices)
             , Cmd.none )
         
+        MouseUp t->
+            ( Model (generateBoard)(List.map 
+            (\x ->
+                if ((Tuple.first t) < (x.positionX+20) && (Tuple.first t) > (x.positionX-20) && 
+                    (Tuple.second t) < (x.positionY+20) && (Tuple.second t) > (x.positionY-20)) then
+                    Piece x.id x.positionX x.positionY x.color (not x.clicked)
+                else
+                    x
+            )
+            model.pices)
+            , Cmd.none )
+
         MouseMove t->
             ( Model (generateBoard) (List.map 
             (\x->
@@ -144,7 +183,26 @@ update msg model =
 
         option1 ->
             ( model, Cmd.none )
-            
+
+isInside: Piece -> Square -> Bool
+isInside piece square = 
+    let
+        square_centerX = toFloat (square.positionX + 35)
+        square_centerY = toFloat (square.positionY + 35)
+    in
+    (
+    (piece.positionX < (square_centerX +30)) &&
+    (piece.positionX > (square_centerX-30)) &&
+    (piece.positionY < (square_centerY +30)) &&
+    (piece.positionY > (square_centerY-30))
+    )
+
+
+--putPiece: List Square -> Piece -> Piece
+--putPiece square_list piece = 
+--    List.map()    
+
+
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
@@ -194,10 +252,13 @@ showCanvas square_list piece_list =
 view : Model -> Html Msg
 view model =
      div[
-          Mouse.onClick (\event -> MouseDownAt event.offsetPos)
-         ,Mouse.onMove (\event -> MouseMove event.offsetPos)
+        Mouse.onDown (\event -> MouseDownAt event.offsetPos)
+        ,Mouse.onUp  (\event -> MouseUp event.offsetPos)
+        ,Mouse.onMove (\event -> MouseMove event.offsetPos)
         ]
-     [showCanvas model.squares model.pices]
+        [
+        showCanvas model.squares model.pices
+        ]
 
 main : Program Value Model Msg
 main =
