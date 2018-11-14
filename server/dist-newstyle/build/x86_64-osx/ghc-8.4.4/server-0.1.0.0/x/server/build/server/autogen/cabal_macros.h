@@ -11,6 +11,17 @@
   (major1) == 0 && (major2) == 1 && (minor) <= 0)
 #endif /* MIN_VERSION_server */
 
+/* package aeson-1.4.1.0 */
+#ifndef VERSION_aeson
+#define VERSION_aeson "1.4.1.0"
+#endif /* VERSION_aeson */
+#ifndef MIN_VERSION_aeson
+#define MIN_VERSION_aeson(major1,major2,minor) (\
+  (major1) <  1 || \
+  (major1) == 1 && (major2) <  4 || \
+  (major1) == 1 && (major2) == 4 && (minor) <= 1)
+#endif /* MIN_VERSION_aeson */
+
 /* package base-4.11.1.0 */
 #ifndef VERSION_base
 #define VERSION_base "4.11.1.0"
@@ -21,6 +32,28 @@
   (major1) == 4 && (major2) <  11 || \
   (major1) == 4 && (major2) == 11 && (minor) <= 1)
 #endif /* MIN_VERSION_base */
+
+/* package servant-0.15 */
+#ifndef VERSION_servant
+#define VERSION_servant "0.15"
+#endif /* VERSION_servant */
+#ifndef MIN_VERSION_servant
+#define MIN_VERSION_servant(major1,major2,minor) (\
+  (major1) <  0 || \
+  (major1) == 0 && (major2) <  15 || \
+  (major1) == 0 && (major2) == 15 && (minor) <= 0)
+#endif /* MIN_VERSION_servant */
+
+/* package servant-server-0.15 */
+#ifndef VERSION_servant_server
+#define VERSION_servant_server "0.15"
+#endif /* VERSION_servant_server */
+#ifndef MIN_VERSION_servant_server
+#define MIN_VERSION_servant_server(major1,major2,minor) (\
+  (major1) <  0 || \
+  (major1) == 0 && (major2) <  15 || \
+  (major1) == 0 && (major2) == 15 && (minor) <= 0)
+#endif /* MIN_VERSION_servant_server */
 
 /* tool gcc-4.2.1 */
 #ifndef TOOL_VERSION_gcc
