@@ -1,6 +1,7 @@
 module Main where
 
 import Datas
+import Functions
 
 
 main :: IO ()
